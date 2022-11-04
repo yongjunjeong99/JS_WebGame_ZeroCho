@@ -1,0 +1,68 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>로또 추첨기</title>
+    <style>
+      .ball {
+        display: inline-block;
+        border: 1px solid black;
+        border-radius: 20px;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+        text-align: center;
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result">추첨 결과는 ?</div>
+    <div id="bonus">보너스:</div>
+    <script>
+      // 45개의 공 선언
+      const candidate = Array(45)
+        .fill()
+        .map((v, i) => i + 1);
+      const shuffle = [];
+      // for (let i = candidate.length; i > 0; i--) {
+      //   const random = Math.floor(Math.random() * candidate.length); //무작위 인덱스
+      //   const spliceArray = candidate.splice(random, 1); //뽑은 값은 배열에 있음(증복x)
+      //   const value = spliceArray[0]; //배열에 들어 있는 값을 꺼내어
+      //   shuffle.push(value); //배열에 넣기
+      // }
+      while (candidate.length > 0) {
+        const random = Math.floor(Math.random() * candidate.length); //무작위 인덱스
+        const spliceArray = candidate.splice(random, 1); //뽑은 값은 배열에 있음(증복x)
+        const value = spliceArray[0]; //배열에 들어 있는 값을 꺼내어
+        shuffle.push(value); //배열에 넣기
+      }
+      console.log(shuffle);
+      const winball = shuffle.slice(0, 6).sort((a, b) => a - b); // 45개의 공 중에 뽑힌 6개의 공들을 정렬하고 작은 숫자 순으로 배열
+      const bonus = shuffle[6]; //보너스 공(인덱스 6번째) 뽑기
+      console.log(winball, bonus);
+
+      const $result = document.querySelector("#result");
+      const $bonus = document.querySelector("#bonus");
+
+      //화면 표시
+      const showBall = (number, $target) => {
+        const $ball = document.createElement("div");
+        $ball.className = "ball";
+        $ball.textContent = number;
+        $target.appendChild($ball);
+      };
+      //화면 표시 일정 시간 후 실행하기
+      for (let i = 0; i < winball.length; i++) {
+        setTimeout(() => {
+          showBall(winball[i], $result);
+        }, (i + 1) * 1000); // [0,1,2,3,4,5] -> [1000,2000,3000,4000,5000,6000]
+      }
+      setTimeout(() => {
+        showBall(bonus, $bonus);
+      }, 7000);
+    </script>
+  </body>
+</html>

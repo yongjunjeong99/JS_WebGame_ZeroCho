@@ -1,0 +1,145 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>숫자 야구_selfcheck</title>
+  </head>
+  <body>
+    <form id="form">
+      <input type="text" id="input" />
+      <button>확인</button>
+    </form>
+    <div id="logs"></div>
+    <script>
+      const $form = document.querySelector("#form");
+      const $input = document.querySelector("#input");
+      const $logs = document.querySelector("#logs");
+
+      //정수 넣기
+      const numbers = [];
+      for (let n = 0; n < 9; n++) {
+        numbers.push(n + 1); //1부터 9 정수대입
+      }
+
+      //답
+      const answer = [];
+      for (let k = 0; k < 4; k++) {
+        const index = Math.floor(Math.random() * numbers.length); //0.1~0.9니까 x 1~9를 하면 1부터 8의 숫자가 나옴
+        answer.push(numbers[index]);
+        numbers.splice(index, 1); //겹치지않게 (이미 나온 숫자는 빼주는 의미)
+      }
+      console.log(answer); //답 확인
+      //시도한 횟수 담기
+      const tries = [];
+      function checkInput(input) {
+        //숫자 오류 검사하는 코드 -> 4자리인지 확인, 중복되는 숫자가 있는지 확인, 이미 제출한 숫자인지 확인
+        if (input.length !== 4) {
+          return alert("숫자 4자리 입력하세요");
+        }
+        if (new Set(input).size !== 4) {
+          //new Set().size는 중복된 숫자는 count 안함. 즉 == 4가 아니면 중복된 숫자가 있다는 의미
+          return alert("각각 다른 숫자를 입력하세요");
+        }
+        if (tries.includes(input)) {
+          return alert("이미 시도한 값입니다.");
+        }
+        return true;
+      }
+      //패배 알림 함수
+      function defeated() {
+        $logs.append(`패배! 정답은 ${answer.join("")}`);
+      }
+
+      let out = 0;
+      $form.addEventListener("submit", (event) => {
+        event.preventDefault(); //기본 동작 막기
+        const value = $input.value; //입력값 받기
+        $input.value = ""; //입력창 초기화
+        if (!checkInput(value)) {
+          //검사 오류 있음
+          return;
+        }
+        // 검사 오류 없음
+        // 정답 맞춘 경우
+        if (answer.join("") === value) {
+          $logs.textContent = "홈런~!";
+          return;
+        }
+        // 10번 시도 했는지 검사
+        if (tries.length >= 9) {
+          defeated();
+          return;
+        }
+        // 몇스트라이크 몇볼인지 검사
+        let strike = 0;
+        let ball = 0;
+        //ex: answer: 3146, value: 1234
+        for (let i = 0; i < answer.length; i++) {
+          const index = value.indexOf(answer[i]);
+          //일치하는 숫자 발견
+          if (index > -1) {
+            //자릿수도 같음
+            if (index === i) {
+              strike += 1;
+            }
+            //숫자만 같음
+            else {
+              ball += 1;
+            }
+          }
+        }
+
+        //forEach문 형식
+        // answer.forEach((element, i) => {
+        //   const index = value.indexOf(element);
+        //   //일치하는 숫자 발견
+        //   if (index > -1) {
+        //     //자릿수도 같음
+        //     if (index === i) {
+        //       strike += 1;
+        //     }
+        //     //숫자만 같음
+        //     else {
+        //       ball += 1;
+        //     }
+        //   }
+        // });
+
+        //모든 숫자가 불일치
+        if (strike === 0 && ball === 0) {
+          out++;
+          //아웃 글자에 빨간색 넣기
+          let outColor = document.createElement("span");
+          outColor.style.color = "red";
+          outColor.innerHTML = "아웃";
+          $logs.append(
+            `${value} : ${out}`,
+            outColor,
+            document.createElement("br")
+          );
+        } else {
+          let stColor = document.createElement("span");
+          stColor.style.color = "blue";
+          stColor.innerHTML = "스트라이크";
+          let ballColor = document.createElement("span");
+          ballColor.style.color = "green";
+          ballColor.innerHTML = "볼";
+          $logs.append(
+            `${value} : ${strike}`,
+            stColor,
+            `${ball}`,
+            ballColor,
+            document.createElement("br")
+          );
+        }
+        if (out === 3) {
+          defeated();
+          return;
+        }
+        // 로그 기록 남기기
+        tries.push(value);
+      });
+    </script>
+  </body>
+</html>

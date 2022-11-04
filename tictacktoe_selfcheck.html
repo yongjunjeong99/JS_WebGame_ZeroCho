@@ -1,0 +1,131 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>컴퓨터와 하는 틱택토 게임</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        border: 1px solid black;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const { body } = document;
+      const $table = document.createElement("table");
+      const $result = document.createElement("div");
+      let turn = "O";
+      const rows = []; //한 줄
+
+      //인덱스 값 검사
+      const checkWinner = (target) => {
+        const rowIndex = target.parentNode.rowIndex;
+        const cellIndex = target.cellIndex;
+
+        let hasWinner = false;
+        //가로줄 검사
+        if (
+          rows[rowIndex][0].textContent === turn &&
+          rows[rowIndex][1].textContent === turn &&
+          rows[rowIndex][2].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        //세로줄 검사
+        if (
+          rows[0][cellIndex].textContent === turn &&
+          rows[1][cellIndex].textContent === turn &&
+          rows[2][cellIndex].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        // 대각선 검사
+        if (
+          (rows[0][0].textContent === turn &&
+            rows[1][1].textContent === turn &&
+            rows[2][2].textContent === turn) ||
+          (rows[2][0].textContent === turn &&
+            rows[1][1].textContent === turn &&
+            rows[0][2].textContent === turn)
+        ) {
+          hasWinner = true;
+        }
+        return hasWinner;
+      };
+
+      //승자와 무승부 판단
+      const checkWinnerAndDraw = (target) => {
+        const hasWinner = checkWinner(target);
+        //승자 있다면
+        if (hasWinner) {
+          $result.textContent = `${turn}의 승리`;
+          $table.removeEventListener("click", callback);
+          return;
+        }
+        //승자 없다면 (무승부)
+        const draw = rows.flat().every((cell) => cell.textContent);
+        if (draw) {
+          $result.textContent = `무승부`;
+          return;
+        }
+        //턴 바꿔주기
+        if (turn === "O") {
+          turn = "X";
+        } else if (turn === "X") {
+          turn = "O";
+        }
+      };
+
+      let clickable = true;
+      const callback = (event) => {
+        if (!clickable) {
+          return;
+        }
+        //칸이 채워져있을 때
+        if (event.target.textContent !== "") {
+          alert("빈칸이 아닙니다.");
+          return;
+        }
+        //칸이 비어져있을 때
+        event.target.textContent = turn;
+        //승부판단
+        checkWinnerAndDraw(event.target);
+        // 컴퓨터 차례 - selfcheck
+        if (turn === "X") {
+          const emptyCells = rows.flat().filter((v) => !v.textContent); //조건: 빈칸이면
+          const randomCell =
+            emptyCells[Math.floor(Math.random() * emptyCells.length)]; //0부터 emptyCells 갯수 - 1 까지 (인덱스)
+          clickable = false;
+          setTimeout(() => {
+            randomCell.textContent = "X";
+            checkWinnerAndDraw(randomCell);
+            clickable = true;
+          }, 1000);
+        }
+      };
+
+      // table, tr, td 태그 생성
+      for (let i = 0; i < 3; i++) {
+        const $tr = document.createElement("tr");
+        const cells = []; //한 칸
+        for (let j = 0; j < 3; j++) {
+          const $td = document.createElement("td");
+          cells.push($td); //배열에 값을 넣기위해서는 push 사용
+          $tr.append($td); //tr태그에 td태그 요소 추가
+        }
+        rows.push(cells); //한 줄에 tr 추가
+        $table.append($tr); // 테이블에 tr 추가
+      }
+      $table.addEventListener("click", callback);
+      body.append($table);
+      body.append($result);
+    </script>
+  </body>
+</html>

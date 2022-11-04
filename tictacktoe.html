@@ -1,0 +1,152 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>틱택토</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        border: 1px solid black;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      //구조분해 할당 - document가 붙은 부분 생략 가능
+      const { body } = document; //최신문법 === const body = document.body;
+      const $table = document.createElement("table");
+      const $result = document.createElement("div");
+
+      let turn = "O";
+
+      //승부 판단하기
+      const checkWinner = (target) => {
+        //밑에 주석 forEach문까지와 같은 실행 코드
+        // cell같은 경우 target 설정하면 본인을 인지. row의 경우 td의 부모인 tr을 태그하여 인지
+        const rowIndex = target.parentNode.rowIndex;
+        const cellIndex = target.cellIndex;
+        // let rowIndex; //몇번째 줄
+        // let cellIndex; //몇번째 칸
+        // rows.forEach((row, ri) => {
+        //   row.forEach((cell, ci) => {
+        //     if (cell === target) {
+        //       rowIndex = ri;
+        //       cellIndex = ci;
+        //     }
+        //   });
+        // });
+
+        //세 칸 다 채워졌나? true가 되면 승자
+        let hasWinner = false;
+        //가로줄 검사
+        if (
+          rows[rowIndex][0].textContent === turn &&
+          rows[rowIndex][1].textContent === turn &&
+          rows[rowIndex][2].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        //세로줄 검사
+        if (
+          rows[0][cellIndex].textContent === turn &&
+          rows[1][cellIndex].textContent === turn &&
+          rows[2][cellIndex].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        //대각선 검사
+        if (
+          rows[0][0].textContent === turn &&
+          rows[1][1].textContent === turn &&
+          rows[2][2].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        if (
+          rows[0][2].textContent === turn &&
+          rows[1][1].textContent === turn &&
+          rows[2][0].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        return hasWinner;
+      };
+
+      // //2차원 배열 생성 (배열 안에 배열 푸시)
+      // const data = [];
+      // for (let i = 0; i < 3; i++) {
+      //   data.push([]);
+      // }
+
+      // //2차원 배열 생성 2번째 방법
+      const rows = [];
+      const callback = (event) => {
+        // 칸이 이미 채워져 있는가?
+        if (event.target.textContent !== "") {
+          console.log("빈칸이 아닙니다");
+          return;
+        }
+        // 빈칸일 때
+        console.log("빈칸입니다.");
+        event.target.textContent = turn;
+
+        //승부 판단하기 함수 호출
+        const hasWinner = checkWinner(event.target);
+        if (hasWinner) {
+          $result.textContent = `${turn}님이 승리!`;
+          // 승리했을 때 칸이 눌러지지 않게 하기 위해
+          $table.removeEventListener("click", callback);
+          return;
+        }
+        //무승부 검사 - 칸이 꽉 찼을 때
+        const draw = rows.flat().every((cell) => cell.textContent);
+        //밑에 forEach문과 같은 코드(flat과 every메서드를 이용한)
+        // let draw = true;
+        // rows.forEach((row) => {
+        //   row.forEach((cell) => {
+        //     if (!cell.textContent) {
+        //       //한 칸이라도 비어있지 않다면 무승부는 false
+        //       draw = false;
+        //     }
+        //   });
+        // });
+        if (draw) {
+          $result.textContent = `무승부`;
+          return; //if문은 중첩되면 안좋기 때문에 return으로 바로바로 끊어주기
+        }
+        //승부 확인
+        // turn = turn === "O" ? "X" : "O";
+        // 위에 코드는 삼항연산자를 통해 밑에 코드를 한줄로 줄인 것
+        if (turn === "O") {
+          turn = "X";
+        } else if (turn === "X") {
+          turn = "O";
+        }
+      };
+
+      //table, tr, td 태그 스크립트 내부에서 생성하고 추가하기
+      for (let i = 0; i < 3; i++) {
+        const $tr = document.createElement("tr");
+        // cells와 rows를 통해 2차 배열 생성 tr, td
+        const cells = [];
+        for (let j = 0; j < 3; j++) {
+          const $td = document.createElement("td");
+          cells.push($td);
+          $tr.append($td);
+        }
+        rows.push(cells);
+        $table.append($tr);
+      }
+      //이벤트 버블링 현상  - td태그가 아닌 테이블 태그에 이벤트를 달아도 정상 작동
+      $table.addEventListener("click", callback);
+      body.append($table);
+      body.append($result);
+    </script>
+  </body>
+</html>

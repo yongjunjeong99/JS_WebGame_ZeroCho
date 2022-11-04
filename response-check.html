@@ -1,0 +1,78 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>반응속도</title>
+    <style>
+      #screen {
+        width: 300px;
+        height: 200px;
+        text-align: center;
+        user-select: none;
+      }
+      #screen.waiting {
+        background-color: aqua;
+      }
+      #screen.ready {
+        background-color: red;
+        color: white;
+      }
+      #screen.now {
+        background-color: greenyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="screen" class="waiting">클릭해서 시작하세요</div>
+    <div id="result"></div>
+    <script>
+      const $screen = document.querySelector("#screen");
+      const $result = document.querySelector("#result");
+
+      let startTime;
+      let endTime;
+      const records = []; // 반응 속도 기록 보관배열
+      let timeoutId; // 성급한 클릭했을 때 타이머 끄기 위함
+      $screen.addEventListener("click", (event) => {
+        if (event.target.classList.contains("waiting")) {
+          //파랑
+          $screen.classList.remove("waiting");
+          $screen.classList.add("ready");
+          $screen.textContent = "초록색이 되면 클릭하세요";
+          //빨강색이 되자마자 타이머가 실행되어야 하기 때문에 타이머함수는 여기서 실행되어야함
+          timeoutId = setTimeout(function () {
+            startTime = new Date();
+            $screen.classList.remove("ready");
+            $screen.classList.add("now");
+            $screen.textContent = "클릭하세요";
+            //첫시간 재기
+          }, Math.floor(Math.random() * 1000) + 2000); //2000~3000 사이 수
+        } else if (event.target.classList.contains("ready")) {
+          //빨강
+          // 빨강색일때 클릭하면 부정 클릭
+          clearTimeout(timeoutId); //타이머 멈추기 그래야 연타했을 때 버그 안남
+          $screen.classList.remove("ready");
+          $screen.classList.add("waiting");
+          $screen.textContent = "너무 성급하세요 !";
+        } else if (event.target.classList.contains("now")) {
+          //초록
+          //끝 시간 재기
+          endTime = new Date();
+          // 시간 차이  (리코드 배열에 넣기)
+          const current = endTime - startTime;
+          records.push(current);
+          // 시간 차이 평균 구하기
+          const average = records.reduce((a, c) => a + c) / records.length;
+          $result.textContent = `현재 ${current}ms, 평균: ${average}ms`;
+          startTime = null;
+          endTime = null;
+          $screen.classList.remove("now");
+          $screen.classList.add("waiting");
+          $screen.textContent = "클릭해서 시작하세요";
+          //시간 차이 저장하기
+        }
+      });
+    </script>
+  </body>
+</html>

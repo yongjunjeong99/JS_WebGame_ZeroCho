@@ -1,0 +1,87 @@
+<!-- 숙제: 로또 번호를 내가 입력해서 로또 번호와 비교한 다음 몇등인지 맞추는 프로그램 짜보기 -->
+
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>로또 추첨기</title>
+    <style>
+      .ball {
+        display: inline-block;
+        border: 1px solid black;
+        border-radius: 20px;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+        text-align: center;
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result">추첨 결과는 ?</div>
+    <div id="bonus">보너스 :</div>
+    <script>
+      //45까지 배열 선언 및 섞기
+      const candidate = Array(45)
+        .fill()
+        .map((v, i) => i + 1);
+      const shuffle = [];
+      //45가지 숫자를 랜덤으로 뽑기
+      while (candidate.length > 0) {
+        const random = Math.floor(Math.random() * candidate.length);
+        //값 중복되지 않게 하기 위함
+        const spliceArray = candidate.splice(random, 1); //random인덱스에서 하나를 제거(첫번째꺼)
+        const value = spliceArray[0];
+        shuffle.push(value);
+      }
+      console.log(shuffle);
+      //앞에 숫자 6개 뽑고, sort메서드로 오름차순 정렬
+      const winball = shuffle.slice(0, 6).sort((a, b) => a - b);
+      const bonus = shuffle[6]; //보너스 공
+      console.log(winball, bonus);
+
+      const $result = document.querySelector("#result");
+      const $bonus = document.querySelector("#bonus");
+
+      //공 색깔 넣기
+      const colorize = (num, tar) => {
+        if (num < 10) {
+          tar.style.backgroundColor = "red";
+          tar.style.color = "white";
+        } else if (num < 20) {
+          tar.style.backgroundColor = "orange";
+        } else if (num < 30) {
+          tar.style.backgroundColor = "yellow";
+        } else if (num < 40) {
+          tar.style.backgroundColor = "blue";
+          tar.style.color = "white";
+        } else {
+          tar.style.backgroundColor = "green";
+          tar.style.color = "white";
+        }
+      };
+
+      //화면 표시
+      const showBall = (num, tar) => {
+        const $ball = document.createElement("div");
+        $ball.className = "ball";
+        $ball.textContent = num;
+        colorize(num, $ball);
+        tar.append($ball);
+      };
+
+      //화면 표시 일정 시간 후 실행
+      for (let i = 0; i < winball.length; i++) {
+        setTimeout(() => {
+          showBall(winball[i], $result);
+        }, (i + 1) * 1000);
+      }
+      setTimeout(() => {
+        showBall(bonus, $bonus);
+      }, 7000);
+    </script>
+  </body>
+</html>
